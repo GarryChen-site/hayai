@@ -2,7 +2,6 @@
 #include "hayai/net/Poller.h"
 #include <system_error>
 #include <unistd.h>
-#include <vector>
 
 namespace hayai {
 Poller::Poller(EventLoop *loop)
@@ -88,19 +87,19 @@ void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
     Channel *channel = static_cast<Channel *>(events_[i].udata);
 
     int events = 0;
-    if (events[i].filter == EVFILT_READ) {
+    if (events_[i].filter == EVFILT_READ) {
       events |= Channel::kReadEvent;
     }
 
-    if (events[i].filter == EVFILT_WRITE) {
+    if (events_[i].filter == EVFILT_WRITE) {
       events |= Channel::kWriteEvent;
     }
 
-    if (events[i].flags & EV_EOF) {
+    if (events_[i].flags & EV_EOF) {
       events |= Channel::kCloseEvent;
     }
 
-    if (events[i].flags & EV_ERROR) {
+    if (events_[i].flags & EV_ERROR) {
       events |= Channel::kErrorEvent;
     }
 

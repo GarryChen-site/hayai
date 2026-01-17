@@ -2,7 +2,6 @@
 #include "hayai/net/InetAddress.h"
 #include <arpa/inet.h>
 #include <cstdint>
-#include <cstring>
 
 namespace hayai {
 

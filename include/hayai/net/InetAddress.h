@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstring>
-#include <format>
 #include <netinet/in.h>
 #include <string>
 #include <string_view>
@@ -24,11 +22,14 @@ public:
 
   void setSockAddr(const sockaddr_in &addr) { addr_ = addr; }
 
-  bool operator==(const InetAddress &other) const {
-    return memcmp(&addr_, &other.addr_, sizeof(addr_)) == 0;
+  // Comparison operators
+  bool operator==(const InetAddress &rhs) const {
+    return addr_.sin_family == rhs.addr_.sin_family &&
+           addr_.sin_port == rhs.addr_.sin_port &&
+           addr_.sin_addr.s_addr == rhs.addr_.sin_addr.s_addr;
   }
 
-  bool operator!=(const InetAddress &other) const { return !(*this == other); }
+  bool operator!=(const InetAddress &rhs) const { return !(*this == rhs); }
 
 private:
   sockaddr_in addr_;

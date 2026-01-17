@@ -40,46 +40,66 @@ void Socket::setNonBlocking() {
 
 void Socket::setReuseAddr(bool on) {
   int optval = on ? 1 : 0;
-  ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+  if (::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) <
+      0) {
+    throw std::system_error(errno, std::system_category(),
+                            "setsockopt SO_REUSEADDR");
+  }
 }
 
 void Socket::setReusePort(bool on) {
   int optval = on ? 1 : 0;
-  ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+  if (::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval)) <
+      0) {
+    throw std::system_error(errno, std::system_category(),
+                            "setsockopt SO_REUSEPORT");
+  }
 }
 
 void Socket::setTcpNoDelay(bool on) {
   int optval = on ? 1 : 0;
-  ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+  if (::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval)) <
+      0) {
+    throw std::system_error(errno, std::system_category(),
+                            "setsockopt TCP_NODELAY");
+  }
 }
 
 void Socket::setKeepAlive(bool on) {
   int optval = on ? 1 : 0;
-  ::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+  if (::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval)) <
+      0) {
+    throw std::system_error(errno, std::system_category(),
+                            "setsockopt SO_KEEPALIVE");
+  }
 }
 
 void Socket::bind(const InetAddress &addr) {
   if (::bind(sockfd_, addr.getSockAddr(), sizeof(sockaddr_in)) < 0) {
-    throw std::system_error(errno, std::system_category(), "bind failed");
+    throw std::system_error(errno, std::system_category(), "bind");
   }
 }
 
 void Socket::listen() {
   if (::listen(sockfd_, SOMAXCONN) < 0) {
-    throw std::system_error(errno, std::system_category(), "listen failed");
+    throw std::system_error(errno, std::system_category(), "listen");
   }
 }
 
 int Socket::accept(InetAddress *peerAddr) {
   sockaddr_in addr;
-  socklen_t len = sizeof(addr);
+  socklen_t addrlen = sizeof(addr);
   std::memset(&addr, 0, sizeof(addr));
 
-  int connfd = ::accept(sockfd_, reinterpret_cast<sockaddr *>(&addr), &len);
+  int connfd = ::accept(sockfd_, reinterpret_cast<sockaddr *>(&addr), &addrlen);
 
   if (connfd >= 0) {
     peerAddr->setSockAddr(addr);
+    // Set non-blocking manually since macOS doesn't have accept4
+    int flags = ::fcntl(connfd, F_GETFL, 0);
+    ::fcntl(connfd, F_SETFL, flags | O_NONBLOCK);
   }
+
   return connfd;
 }
 

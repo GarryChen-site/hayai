@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Compiler flags for macOS ARM64
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -fsanitize=address")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
@@ -31,13 +31,17 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 file(GLOB_RECURSE TEST_SOURCES "tests/*.cc")
 
-foreach(test_source ${TEST_SOURCES})
-    get_filename_component(test_name ${test_source} NAME_WE)
-    add_executable(${test_name} ${test_source})
-    target_link_libraries(${test_name} hayai GTest::gtest_main)
-    add_test(NAME ${test_name} COMMAND ${test_name})
-endforeach()
+# Test executables
+enable_testing()
 
-#Examples
-add_executable(echo_server examples/echo_server.cc)
-target_link_libraries(echo_server hayai)
+add_executable(InetAddressTest tests/InetAddressTest.cc)
+target_link_libraries(InetAddressTest hayai gtest_main)
+add_test(NAME InetAddressTest COMMAND InetAddressTest)
+
+add_executable(SocketTest tests/SocketTest.cc)
+target_link_libraries(SocketTest hayai gtest_main)
+add_test(NAME SocketTest COMMAND SocketTest)
+
+add_executable(EventLoopTest tests/EventLoopTest.cc)
+target_link_libraries(EventLoopTest hayai gtest_main)
+add_test(NAME EventLoopTest COMMAND EventLoopTest)

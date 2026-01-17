@@ -1,15 +1,16 @@
 
 #include "hayai/net/InetAddress.h"
 #include <arpa/inet.h>
-#include <cstdint>
+#include <cstring>
+#include <sstream>
 
 namespace hayai {
 
 InetAddress::InetAddress(uint16_t port, bool loopback) {
   std::memset(&addr_, 0, sizeof(addr_));
   addr_.sin_family = AF_INET;
-  addr_.sin_port = htons(port);
   addr_.sin_addr.s_addr = htonl(loopback ? INADDR_LOOPBACK : INADDR_ANY);
+  addr_.sin_port = htons(port);
 }
 
 InetAddress::InetAddress(std::string_view ip, uint16_t port) {
@@ -27,7 +28,9 @@ std::string InetAddress::toIp() const {
 }
 
 std::string InetAddress::toIpPort() const {
-  return std::format("{}:{}", toIp(), port());
+  std::ostringstream oss;
+  oss << toIp() << ":" << port();
+  return oss.str();
 }
 
 uint16_t InetAddress::port() const { return ntohs(addr_.sin_port); }

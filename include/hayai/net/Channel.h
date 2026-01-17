@@ -1,5 +1,6 @@
 #include "hayai/utils/NonCopyable.h"
 #include <functional>
+#include <memory>
 namespace hayai {
 class EventLoop;
 
@@ -45,6 +46,7 @@ public:
     events_ = kNoneEvent;
     update();
   }
+  void remove();
 
   [[nodiscard]] int fd() const { return fd_; }
   [[nodiscard]] int events() const { return events_; }
@@ -52,6 +54,7 @@ public:
   [[nodiscard]] bool isNoneEvent() const { return events_ == kNoneEvent; }
   [[nodiscard]] bool isReading() const { return events_ & kReadEvent; }
   [[nodiscard]] bool isWriting() const { return events_ & kWriteEvent; }
+  [[nodiscard]] EventLoop *ownerLoop() const { return loop_; }
 
   [[nodiscard]] int index() const { return index_; }
   void setIndex(int idx) { index_ = idx; }
@@ -69,8 +72,8 @@ private:
 
   EventLoop *loop_;
   const int fd_;
-  int events_{kNoneEvent};  // Events Poller should watch
-  int revents_{kNoneEvent}; // Events actually occurred
+  int events_{0};  // Events Poller should watch
+  int revents_{0}; // Events actually occurred
   int index_{-1};
 
   std::weak_ptr<void> tie_; // The "guard" for obj lifetime

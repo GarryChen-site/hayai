@@ -1,14 +1,19 @@
 #include "hayai/net/Channel.h"
+#include "hayai/net/EventLoop.h"
 
 namespace hayai {
 Channel::Channel(EventLoop *loop, int fd) : loop_(loop), fd_(fd) {}
+
+Channel::~Channel() = default;
 
 void Channel::tie(const std::shared_ptr<void> &obj) {
   tie_ = obj;
   tied_ = true;
 }
 
-void Channel::update() {}
+void Channel::update() { loop_->updateChannel(this); }
+
+void Channel::remove() { loop_->removeChannel(this); }
 
 void Channel::handleEvent() {
   if (tied_) {
@@ -21,21 +26,21 @@ void Channel::handleEvent() {
 }
 
 void Channel::handleEventWithGuard() {
-  // 1. Error handling
-  if ((revents_ & kErrorEvent) && errorCallback_) {
-    errorCallback_();
+  if (revents_ & kErrorEvent) {
+    if (errorCallback_)
+      errorCallback_();
   }
-  // 2. Peer closed connection
-  if ((revents_ & kCloseEvent) && !(revents_ & kReadEvent) && closeCallback_) {
-    closeCallback_();
+  if (revents_ & kCloseEvent) {
+    if (closeCallback_)
+      closeCallback_();
   }
-  // 3. Read events
-  if ((revents_ & kReadEvent) && readCallback_) {
-    readCallback_();
+  if (revents_ & kReadEvent) {
+    if (readCallback_)
+      readCallback_();
   }
-  // 4. Write events
-  if ((revents_ & kWriteEvent) && writeCallback_) {
-    writeCallback_();
+  if (revents_ & kWriteEvent) {
+    if (writeCallback_)
+      writeCallback_();
   }
 }
 } // namespace hayai

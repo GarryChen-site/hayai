@@ -49,3 +49,7 @@ add_test(NAME EventLoopTest COMMAND EventLoopTest)
 add_executable(AcceptorTest tests/AcceptorTest.cc)
 target_link_libraries(AcceptorTest hayai gtest_main)
 add_test(NAME AcceptorTest COMMAND AcceptorTest)
+
+add_executable(BufferTest tests/BufferTest.cc)
+target_link_libraries(BufferTest hayai gtest_main)
+add_test(NAME BufferTest COMMAND BufferTest)

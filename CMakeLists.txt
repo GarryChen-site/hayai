@@ -53,3 +53,7 @@ add_test(NAME AcceptorTest COMMAND AcceptorTest)
 add_executable(BufferTest tests/BufferTest.cc)
 target_link_libraries(BufferTest hayai gtest_main)
 add_test(NAME BufferTest COMMAND BufferTest)
+
+add_executable(TcpConnectionTest tests/TcpConnectionTest.cc)
+target_link_libraries(TcpConnectionTest hayai gtest_main)
+add_test(NAME TcpConnectionTest COMMAND TcpConnectionTest)

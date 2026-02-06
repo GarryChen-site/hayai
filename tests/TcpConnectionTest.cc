@@ -22,7 +22,8 @@ TEST_F(TcpConnectionTest, Construction) {
   InetAddress local(8080);
   InetAddress peer(9090);
 
-  auto conn = std::make_shared<TcpConnection>(&loop, fds[0], local, peer);
+  auto conn =
+      std::make_shared<TcpConnection>(&loop, "conn1", fds[0], local, peer);
 
   // Initial state should be Connecting (not connected yet)
   EXPECT_FALSE(conn->connected());
@@ -43,7 +44,8 @@ TEST_F(TcpConnectionTest, AddressGetters) {
   InetAddress local(12345);
   InetAddress peer(54321);
 
-  auto conn = std::make_shared<TcpConnection>(&loop, fds[0], local, peer);
+  auto conn =
+      std::make_shared<TcpConnection>(&loop, "conn2", fds[0], local, peer);
 
   EXPECT_EQ(conn->localAddress().port(), 12345);
   EXPECT_EQ(conn->peerAddress().port(), 54321);
@@ -62,7 +64,8 @@ TEST_F(TcpConnectionTest, CallbackSetters) {
   InetAddress local(8080);
   InetAddress peer(9090);
 
-  auto conn = std::make_shared<TcpConnection>(&loop, fds[0], local, peer);
+  auto conn =
+      std::make_shared<TcpConnection>(&loop, "conn3", fds[0], local, peer);
 
   // Set callbacks - just verify no crash
   conn->setConnectionCallback([](const TcpConnectionPtr &) {});
@@ -83,7 +86,8 @@ TEST_F(TcpConnectionTest, SendBeforeConnected) {
   InetAddress local(8080);
   InetAddress peer(9090);
 
-  auto conn = std::make_shared<TcpConnection>(&loop, fds[0], local, peer);
+  auto conn =
+      std::make_shared<TcpConnection>(&loop, "conn4", fds[0], local, peer);
 
   // Should not crash (send is ignored when not connected)
   EXPECT_FALSE(conn->connected());
@@ -106,7 +110,8 @@ TEST_F(TcpConnectionTest, SharedPtrLifetime) {
   std::weak_ptr<TcpConnection> weakConn;
 
   {
-    auto conn = std::make_shared<TcpConnection>(&loop, fds[0], local, peer);
+    auto conn =
+        std::make_shared<TcpConnection>(&loop, "conn5", fds[0], local, peer);
     weakConn = conn;
     EXPECT_FALSE(weakConn.expired());
 

@@ -8,10 +8,11 @@
 #include <unistd.h>
 
 namespace hayai {
-TcpConnection::TcpConnection(EventLoop *loop, int sockfd,
+TcpConnection::TcpConnection(EventLoop *loop, std::string name, int sockfd,
                              const InetAddress &localAddr,
                              const InetAddress &peerAddr)
-    : loop_(loop), socket_(std::make_unique<Socket>(sockfd)),
+    : loop_(loop), name_(std::move(name)),
+      socket_(std::make_unique<Socket>(sockfd)),
       channel_(std::make_unique<Channel>(loop, sockfd)), localAddr_(localAddr),
       peerAddr_(peerAddr) {
 
@@ -108,7 +109,6 @@ void TcpConnection::handleWrite() {
 
 void TcpConnection::handleClose() {
   loop_->assertInLoopThread();
-  assert(state_ == State::Connected || state_ == State::Disconnecting);
 
   state_ = State::Disconnected;
   channel_->disableAll();
@@ -119,9 +119,7 @@ void TcpConnection::handleClose() {
     connectionCallback_(guardThis);
   }
 
-  if (closeCallback_) {
-    closeCallback_(guardThis);
-  }
+  closeCallback_(guardThis);
 }
 
 void TcpConnection::handleError() {}

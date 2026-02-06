@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #include <sys/socket.h>
+#include <system_error>
 #include <unistd.h>
 namespace hayai {
 
@@ -106,6 +107,19 @@ int Socket::accept(InetAddress *peerAddr) {
 void Socket::shutdownWrite() {
   if (::shutdown(sockfd_, SHUT_WR) < 0) {
   }
+}
+
+InetAddress Socket::getLocalAddr(int sockfd) {
+  struct sockaddr_in addr;
+  socklen_t addrlen = sizeof(addr);
+  std::memset(&addr, 0, sizeof(addr));
+
+  if (::getsockname(sockfd, reinterpret_cast<sockaddr *>(&addr), &addrlen) <
+      0) {
+    throw std::system_error(errno, std::system_category(), "getsockname");
+  }
+
+  return InetAddress(addr);
 }
 
 } // namespace hayai

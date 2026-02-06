@@ -5,6 +5,7 @@
 #include "hayai/utils/NonCopyable.h"
 #include <functional>
 #include <memory>
+#include <string_view>
 
 namespace hayai {
 class EventLoop;
@@ -22,8 +23,8 @@ public:
       std::function<void(const TcpConnectionPtr &, Buffer *)>;
   using CloseCallback = std::function<void(const TcpConnectionPtr &)>;
 
-  TcpConnection(EventLoop *loop, int sockfd, const InetAddress &localAddr,
-                const InetAddress &peerAddr);
+  TcpConnection(EventLoop *loop, std::string name, int sockfd,
+                const InetAddress &localAddr, const InetAddress &peerAddr);
 
   ~TcpConnection();
 
@@ -49,6 +50,13 @@ public:
 
   void setCloseCallback(CloseCallback cb) { closeCallback_ = std::move(cb); }
 
+  void setWriteCompleteCallback(ConnectionCallback cb) {
+    writeCompleteCallback_ = std::move(cb);
+  }
+
+  [[nodiscard]] const std::string &name() const { return name_; }
+  [[nodiscard]] EventLoop *getLoop() const { return loop_; }
+
   // Called by TcpServer/Acceptor
   void connectEstablished();
   void connectDestroyed();
@@ -65,6 +73,7 @@ private:
   void shutdownInLoop();
 
   EventLoop *loop_;
+  std::string name_;
   std::unique_ptr<Socket> socket_;
   std::unique_ptr<Channel> channel_;
   State state_{State::Connecting};
@@ -77,6 +86,7 @@ private:
 
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
+  ConnectionCallback writeCompleteCallback_;
   CloseCallback closeCallback_;
 };
 

@@ -39,6 +39,7 @@ public:
   void shutdownWrite();
 
   [[nodiscard]] static Socket createTcpSocket();
+  [[nodiscard]] static InetAddress getLocalAddr(int sockfd);
 
 private:
   void close();

@@ -61,3 +61,7 @@ add_test(NAME TcpConnectionTest COMMAND TcpConnectionTest)
 add_executable(EventLoopThreadPoolTest tests/EventLoopThreadPoolTest.cc)
 target_link_libraries(EventLoopThreadPoolTest hayai gtest_main)
 add_test(NAME EventLoopThreadPoolTest COMMAND EventLoopThreadPoolTest)
+
+add_executable(TcpServerTest tests/TcpServerTest.cc)
+target_link_libraries(TcpServerTest hayai gtest_main)
+add_test(NAME TcpServerTest COMMAND TcpServerTest)

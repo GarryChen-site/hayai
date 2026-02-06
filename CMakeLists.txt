@@ -65,3 +65,7 @@ add_test(NAME EventLoopThreadPoolTest COMMAND EventLoopThreadPoolTest)
 add_executable(TcpServerTest tests/TcpServerTest.cc)
 target_link_libraries(TcpServerTest hayai gtest_main)
 add_test(NAME TcpServerTest COMMAND TcpServerTest)
+
+# Examples
+add_executable(echo_server examples/echo_server.cc)
+target_link_libraries(echo_server hayai)

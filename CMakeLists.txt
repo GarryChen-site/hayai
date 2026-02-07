@@ -69,3 +69,9 @@ add_test(NAME TcpServerTest COMMAND TcpServerTest)
 # Examples
 add_executable(echo_server examples/echo_server.cc)
 target_link_libraries(echo_server hayai)
+
+
+# Integration tests
+add_executable(EchoServerIntegrationTest tests/EchoServerIntegrationTest.cc)
+target_link_libraries(EchoServerIntegrationTest hayai gtest_main)
+add_test(NAME EchoServerIntegrationTest COMMAND EchoServerIntegrationTest)

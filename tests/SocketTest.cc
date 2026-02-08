@@ -55,7 +55,7 @@ TEST_F(SocketTest, SetReuseAddr) {
   int optval = 0;
   socklen_t optlen = sizeof(optval);
   ::getsockopt(sock.fd(), SOL_SOCKET, SO_REUSEADDR, &optval, &optlen);
-  EXPECT_EQ(optval, 1);
+  EXPECT_NE(optval, 0); // Verify option is enabled (macOS returns 4, not 1)
 }
 
 TEST_F(SocketTest, SetReusePort) {
@@ -65,7 +65,8 @@ TEST_F(SocketTest, SetReusePort) {
   int optval = 0;
   socklen_t optlen = sizeof(optval);
   ::getsockopt(sock.fd(), SOL_SOCKET, SO_REUSEPORT, &optval, &optlen);
-  EXPECT_EQ(optval, 1);
+  EXPECT_NE(optval,
+            0); // Verify option is enabled (macOS returns 512, not 1)
 }
 
 TEST_F(SocketTest, BindAndListen) {

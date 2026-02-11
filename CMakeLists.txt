@@ -75,3 +75,9 @@ target_link_libraries(echo_server hayai)
 add_executable(EchoServerIntegrationTest tests/EchoServerIntegrationTest.cc)
 target_link_libraries(EchoServerIntegrationTest hayai gtest_main)
 add_test(NAME EchoServerIntegrationTest COMMAND EchoServerIntegrationTest)
+
+
+# Coroutine tests
+add_executable(CoroTaskTest tests/CoroTaskTest.cc)
+target_link_libraries(CoroTaskTest hayai gtest_main)
+add_test(NAME CoroTaskTest COMMAND CoroTaskTest)

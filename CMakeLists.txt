@@ -70,6 +70,9 @@ add_test(NAME TcpServerTest COMMAND TcpServerTest)
 add_executable(echo_server examples/echo_server.cc)
 target_link_libraries(echo_server hayai)
 
+add_executable(coro_basic_demo examples/coro_basic_demo.cc)
+target_link_libraries(coro_basic_demo hayai)
+
 
 # Integration tests
 add_executable(EchoServerIntegrationTest tests/EchoServerIntegrationTest.cc)

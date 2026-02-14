@@ -36,7 +36,7 @@ public:
 
   private:
     AsyncConnection &self_;
-    std::coroutine_handle<> waiting_coroutine_;
+    std::coroutine_handle<> waitingCoroutine_;
   };
 
   RecvAwaiter recv() { return RecvAwaiter(*this); }

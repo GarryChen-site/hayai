@@ -84,3 +84,7 @@ add_test(NAME EchoServerIntegrationTest COMMAND EchoServerIntegrationTest)
 add_executable(CoroTaskTest tests/CoroTaskTest.cc)
 target_link_libraries(CoroTaskTest hayai gtest_main)
 add_test(NAME CoroTaskTest COMMAND CoroTaskTest)
+
+add_executable(CoroConnectionTest tests/CoroConnectionTest.cc)
+target_link_libraries(CoroConnectionTest hayai gtest_main)
+add_test(NAME CoroConnectionTest COMMAND CoroConnectionTest)

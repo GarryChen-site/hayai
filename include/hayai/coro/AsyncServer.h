@@ -1,7 +1,6 @@
 #pragma once
 
 #include "hayai/coro/AsyncConnection.h"
-#include "hayai/coro/Task.h"
 #include "hayai/net/EventLoop.h"
 #include "hayai/net/InetAddress.h"
 #include "hayai/net/TcpConnection.h"

@@ -88,3 +88,7 @@ add_test(NAME CoroTaskTest COMMAND CoroTaskTest)
 add_executable(CoroConnectionTest tests/CoroConnectionTest.cc)
 target_link_libraries(CoroConnectionTest hayai gtest_main)
 add_test(NAME CoroConnectionTest COMMAND CoroConnectionTest)
+
+add_executable(CoroServerTest tests/CoroServerTest.cc)
+target_link_libraries(CoroServerTest hayai gtest_main)
+add_test(NAME CoroServerTest COMMAND CoroServerTest)

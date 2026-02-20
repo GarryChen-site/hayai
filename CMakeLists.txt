@@ -73,6 +73,9 @@ target_link_libraries(echo_server hayai)
 add_executable(coro_basic_demo examples/coro_basic_demo.cc)
 target_link_libraries(coro_basic_demo hayai)
 
+add_executable(coro_echo_server examples/coro_echo_server.cc)
+target_link_libraries(coro_echo_server hayai)
+
 
 # Integration tests
 add_executable(EchoServerIntegrationTest tests/EchoServerIntegrationTest.cc)

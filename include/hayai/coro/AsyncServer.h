@@ -54,7 +54,7 @@ private:
   TcpServer server_;
 
   std::mutex acceptMutex_;
-  std::deque<TcpConnectionPtr> pendingConnections_;
+  std::deque<AsyncConnection> pendingConnections_;
   std::optional<std::coroutine_handle<>> acceptCoroutine_;
 };
 } // namespace hayai::coro

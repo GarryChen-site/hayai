@@ -1,5 +1,6 @@
 #include "hayai/coro/AsyncConnection.h"
 #include "hayai/net/EventLoop.h"
+#include "hayai/net/TcpConnection.h"
 
 #include <iostream>
 
@@ -17,12 +18,24 @@ AsyncConnection::AsyncConnection(TcpConnectionPtr conn)
 
 AsyncConnection::~AsyncConnection() = default;
 
+void AsyncConnection::bindCallbacks() {
+  if (!conn_) {
+    return;
+  }
+  conn_->setMessageCallback([this](const TcpConnectionPtr &conn, Buffer *buf) {
+    onMessage(conn, buf);
+  });
+  conn_->setWriteCompleteCallback(
+      [this](const TcpConnectionPtr &conn) { onWriteComplete(conn); });
+}
+
 AsyncConnection::AsyncConnection(AsyncConnection &&other) noexcept
     : conn_(std::move(other.conn_)), loop_(other.loop_),
       recvCoroutine_(std::move(other.recvCoroutine_)),
       receivedData_(std::move(other.receivedData_)),
       sendCoroutine_(std::move(other.sendCoroutine_)) {
   other.loop_ = nullptr;
+  bindCallbacks();
 }
 
 AsyncConnection &AsyncConnection::operator=(AsyncConnection &&other) noexcept {

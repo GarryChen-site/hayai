@@ -15,9 +15,12 @@ AsyncServer::AsyncServer(EventLoop *loop, const InetAddress &addr,
 AsyncServer::~AsyncServer() = default;
 
 void AsyncServer::onConnection(const TcpConnectionPtr &conn) {
+
+  AsyncConnection asyncConn(conn);
+
   std::lock_guard<std::mutex> lock(acceptMutex_);
 
-  pendingConnections_.push_back(conn);
+  pendingConnections_.push_back(std::move(asyncConn));
 
   if (acceptCoroutine_) {
     auto h = *acceptCoroutine_;
@@ -52,9 +55,8 @@ AsyncConnection AsyncServer::AcceptAwaiter::await_resume() {
     throw std::runtime_error("No pending connection (shouldn't happen)");
   }
 
-  auto conn = self_.pendingConnections_.front();
+  AsyncConnection conn = std::move(self_.pendingConnections_.front());
   self_.pendingConnections_.pop_front();
-
-  return AsyncConnection(conn);
+  return conn;
 }
 } // namespace hayai::coro

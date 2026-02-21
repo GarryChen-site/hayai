@@ -86,6 +86,7 @@ private:
 
   void onMessage(const TcpConnectionPtr &conn, Buffer *buf);
   void onWriteComplete(const TcpConnectionPtr &conn);
+  void bindCallbacks();
 
   TcpConnectionPtr conn_;
   EventLoop *loop_;

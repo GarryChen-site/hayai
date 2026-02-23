@@ -1,8 +1,10 @@
 #pragma once
 #include <atomic>
+#include <coroutine>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
 
@@ -25,6 +27,10 @@ public:
 
   void runInLoop(Functor cb);
   void queueInLoop(Functor cb);
+
+  void spawn(std::coroutine_handle<> handle);
+
+  void cleanupSpawnedTask(std::coroutine_handle<> handle);
 
   void updateChannel(Channel *channel);
   void removeChannel(Channel *channel);
@@ -60,6 +66,8 @@ private:
 
   mutable std::mutex mutex_;
   std::vector<Functor> pendingFunctors_;
+
+  std::set<std::coroutine_handle<>> spawnedTasks_;
 };
 
 } // namespace hayai

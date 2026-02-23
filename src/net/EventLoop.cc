@@ -127,4 +127,20 @@ EventLoop *EventLoop::getEventLoopOfCurrentThread() {
   return t_loopInThisThread;
 }
 
+void EventLoop::spawn(std::coroutine_handle<> handle) {
+  runInLoop([this, handle]() {
+    spawnedTasks_.insert(handle);
+
+    handle.resume();
+  });
+}
+
+void EventLoop::cleanupSpawnedTask(std::coroutine_handle<> handle) {
+  auto it = spawnedTasks_.find(handle);
+  if (it != spawnedTasks_.end()) {
+    spawnedTasks_.erase(it);
+    handle.destroy();
+  }
+}
+
 } // namespace hayai

@@ -95,3 +95,7 @@ add_test(NAME CoroConnectionTest COMMAND CoroConnectionTest)
 add_executable(CoroServerTest tests/CoroServerTest.cc)
 target_link_libraries(CoroServerTest hayai gtest_main)
 add_test(NAME CoroServerTest COMMAND CoroServerTest)
+
+add_executable(CoroSpawnTest tests/CoroSpawnTest.cc)
+target_link_libraries(CoroSpawnTest hayai gtest_main)
+add_test(NAME CoroSpawnTest COMMAND CoroSpawnTest)

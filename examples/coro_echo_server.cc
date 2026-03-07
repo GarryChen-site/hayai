@@ -1,16 +1,39 @@
-#include "hayai/coro/AsyncServer.h"
+/**
+ * @file coro_echo_server.cc
+ * @brief Coroutine-style Echo Server
+ *
+ * Demonstrates the full hayai coroutine stack:
+ *   AsyncServer → accept()
+ *   AsyncConnection → recv() / send()
+ *   Task<void> → coroutine type
+ *
+ * This server reads data from each client and echoes it back.
+ * Each connection is handled by a dedicated coroutine that looks
+ * and reads like synchronous code, but is fully asynchronous.
+ *
+ * Usage:
+ *   ./coro_echo_server [port]
+ *
+ * Test with netcat:
+ *   nc 127.0.0.1 8080
+ */
 
+#include "hayai/coro/AsyncConnection.h"
+#include "hayai/coro/AsyncServer.h"
+#include "hayai/coro/Task.h"
 #include "hayai/coro/spawn.h"
+#include "hayai/net/EventLoop.h"
+#include "hayai/net/InetAddress.h"
+#include <atomic>
 #include <csignal>
-#include <exception>
 #include <iostream>
-#include <string>
 
 using namespace hayai;
 using namespace hayai::coro;
 
-// Global flag for graceful shutdown
+// Global flag and loop pointer for graceful shutdown
 static std::atomic<bool> running{true};
+static EventLoop *g_loop = nullptr;
 
 // ── Per-connection coroutine ───────────────────────────────────────────────
 
@@ -87,8 +110,9 @@ int main(int argc, char *argv[]) {
 
   // Graceful shutdown on Ctrl+C
   std::signal(SIGINT, [](int) {
-    std::cout << "\n[Server] Shutting down...\n";
     running.store(false);
+    if (g_loop)
+      g_loop->quit(); // unblocks loop.loop()
   });
 
   EventLoop loop;
@@ -106,8 +130,11 @@ int main(int argc, char *argv[]) {
   // Start the coroutine accept loop (using spawn for proper ownership)
   spawn(&loop, runServer(loop, server));
 
-  // Run the event loop (blocks until loop.quit())
+  // Expose loop for signal handler, then run (blocks until loop.quit())
+  g_loop = &loop;
   loop.loop();
+
+  std::cout << "\n[Server] Shutdown complete.\n";
 
   return 0;
 }

@@ -1,57 +1,58 @@
 #!/usr/bin/env python3
-"""Verbose smoke test for the coro_echo_server."""
-import subprocess, socket, time, sys, os
+"""Smoke test for the coro_echo_server (with spawn())."""
+import subprocess, socket, time, sys
 
-PORT = 18890
+PORT = 18896
 server = subprocess.Popen(
     ["./build/coro_echo_server", str(PORT)],
-    stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    stdout=subprocess.DEVNULL,   # server stdout buffered/not needed
+    stderr=subprocess.DEVNULL,
 )
 
 try:
-    # Give server more time to start
+    # Give server time to start accepting
     time.sleep(0.8)
 
-    # Check server is running
     if server.poll() is not None:
-        out, _ = server.communicate(timeout=2)
-        print("SERVER DIED:", out.decode())
+        print("Server crashed on startup!", file=sys.stderr)
         sys.exit(1)
 
     # Single echo
     s = socket.socket()
     s.settimeout(3.0)
-    try:
-        s.connect(("127.0.0.1", PORT))
-    except ConnectionRefusedError:
-        print("Connection refused - server not accepting!")
-        out = server.stdout.read1(4096)
-        print("Server output:", out.decode())
-        sys.exit(1)
+    s.connect(("127.0.0.1", PORT))
     msg = b"Hello Coroutines!"
     s.sendall(msg)
-    try:
-        resp = s.recv(1024)
-    except socket.timeout:
-        print("Timeout waiting for echo!")
-        s.close()
-        sys.exit(1)
+    resp = s.recv(1024)
     s.close()
-
     assert resp == msg, f"Expected {msg!r}, got {resp!r}"
     print(f"Single echo: PASS ({resp.decode()!r})")
+
+    # Multiple concurrent clients
+    clients = []
+    for i in range(3):
+        c = socket.socket()
+        c.settimeout(3.0)
+        c.connect(("127.0.0.1", PORT))
+        clients.append(c)
+
+    for i, c in enumerate(clients):
+        c.sendall(f"Client {i}".encode())
+
+    for i, c in enumerate(clients):
+        r = c.recv(1024)
+        assert r == f"Client {i}".encode(), f"Mismatch client {i}: {r!r}"
+        c.close()
+        print(f"Concurrent client {i}: PASS")
+
     print("\nAll smoke tests PASSED!")
     sys.exit(0)
 
 except Exception as e:
     print(f"FAILED: {e}", file=sys.stderr)
-    import traceback
-    traceback.print_exc()
+    import traceback; traceback.print_exc()
     sys.exit(1)
 
 finally:
     server.terminate()
-    out, _ = server.communicate(timeout=2)
-    if out:
-        print("\nServer output:")
-        print(out.decode())
+    server.wait(timeout=2)

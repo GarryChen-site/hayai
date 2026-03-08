@@ -28,8 +28,22 @@ public:
   void runInLoop(Functor cb);
   void queueInLoop(Functor cb);
 
+  /**
+   * @brief Spawn a fire-and-forget coroutine on this EventLoop.
+   *
+   * Unlike Task::detach(), spawn() properly owns the coroutine frame
+   * for its entire lifetime, cleaning up automatically on completion.
+   * Thread-safe - can be called from any thread.
+   *
+   * @param task A Task<void> to run. Ownership is transferred.
+   */
   void spawn(std::coroutine_handle<> handle);
 
+  /**
+   * @brief Internal: called by SpawnTask::FinalAwaiter to destroy
+   * the coroutine frame when it completes. Must be called on loop thread.
+   * (Public so spawn.h's FinalAwaiter can reach it without friendship.)
+   */
   void cleanupSpawnedTask(std::coroutine_handle<> handle);
 
   void updateChannel(Channel *channel);

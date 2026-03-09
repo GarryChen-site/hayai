@@ -8,6 +8,20 @@ namespace hayai {
 class EventLoop;
 class Acceptor;
 
+/**
+ * @brief TcpServer - High-level TCP server API
+ * Integrates all components to create a complete multi-threaded network server:
+ * - Acceptor: Accepts new connections
+ * - EventLoopThreadPool: Distributes connections across I/O threads
+ * - TcpConnection: Manages individual connections
+ *
+ * Connection Flow:
+ * 1. Client connects → Acceptor accepts fd
+ * 2. TcpServer::newConnection() creates TcpConnection
+ * 3. Connection assigned to next I/O thread (round-robin)
+ * 4. User callbacks invoked
+ * 5. On close → removeConnection() cleans up
+ */
 class TcpServer : NonCopyable {
 public:
   using ConnectionCallback = std::function<void(const TcpConnectionPtr &)>;
@@ -18,6 +32,12 @@ public:
   TcpServer(EventLoop *loop, const InetAddress &addr, std::string name);
   ~TcpServer();
 
+  /**
+   * @brief Start the server (begin accepting connections)
+   *
+   * Thread-safe. Can be called from any thread.
+   * Idempotent - multiple calls are safe.
+   */
   void start();
 
   void stop();

@@ -11,6 +11,7 @@ public:
   explicit Socket(int sockfd) : sockfd_(sockfd) {}
   ~Socket();
 
+  // Move only
   Socket(Socket &&other) noexcept : sockfd_(other.sockfd_) {
     other.sockfd_ = -1;
   }

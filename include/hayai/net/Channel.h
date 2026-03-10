@@ -4,6 +4,10 @@
 namespace hayai {
 class EventLoop;
 
+/**
+ * @brief Channel represents a communication channel for a file descriptor.
+ * It manages which events the Poller should watch and dispatches callbacks.
+ */
 class Channel : NonCopyable {
 public:
   using EventCallback = std::function<void()>;

@@ -25,7 +25,9 @@ public:
   void loop();
   void quit();
 
+  // execute immediately if in the loop thread, otherwise queue
   void runInLoop(Functor cb);
+  // always queue to be executed after I/O events
   void queueInLoop(Functor cb);
 
   /**
@@ -59,6 +61,7 @@ public:
     }
   }
 
+  // Singleton per thread
   static EventLoop *getEventLoopOfCurrentThread();
 
 private:
@@ -71,10 +74,13 @@ private:
   std::atomic<bool> eventHandling_{false};
   std::atomic<bool> callingPendingFunctors_{false};
 
+  // thread that created this loop
   const std::thread::id threadId_;
   std::unique_ptr<Poller> poller_;
   std::unique_ptr<Channel> wakeupChannel_;
-  int wakeupFd_[2]; // pipe for wakeup
+
+  // Wakeup mechanism (using pipe for macOS/POSIX)
+  int wakeupFd_[2]; // 0: read, 1: write
 
   std::vector<Channel *> activeChannels_;
 

@@ -113,6 +113,7 @@ void EventLoop::doPendingFunctors() {
   callingPendingFunctors_ = true;
 
   {
+    // prevents deadlock, if a functor calls queueInLoop, it will deadlock
     std::scoped_lock lock(mutex_);
     functors.swap(pendingFunctors_);
   }

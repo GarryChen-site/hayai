@@ -1,6 +1,5 @@
 #include "hayai/net/Acceptor.h"
 #include "hayai/net/EventLoop.h"
-#include <cassert>
 #include <unistd.h>
 
 namespace hayai {
@@ -40,6 +39,7 @@ void Acceptor::handleRead() {
       ::close(connfd);
     }
   } else {
+    // Error handling: if too many open files, it might return EMFILE
     // keep simple
   }
 }

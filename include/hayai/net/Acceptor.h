@@ -8,6 +8,11 @@
 namespace hayai {
 class EventLoop;
 
+/**
+ * @brief Acceptor is used by TcpServer to handle new incoming connections.
+ * It listens on a specific port and dispatches new file descriptors via a
+ * callback.
+ */
 class Acceptor : NonCopyable {
 public:
   using NewConnectionCallback =

@@ -31,6 +31,7 @@ ssize_t Buffer::readFd(int fd, int *savedErrno) {
   } else if (static_cast<size_t>(n) <= writable) {
     writerIndex_ += n;
   } else {
+    // Used overflow buffer, need to append extra data
     writerIndex_ = buffer_.size();
     append(extrabuf, n - writable);
   }

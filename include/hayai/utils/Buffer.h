@@ -8,6 +8,19 @@
 
 namespace hayai {
 
+/**
+ * @brief A dynamic buffer for network I/O inspired by Muduo/Trantor.
+ *
+ * Structure:
+ * +-------------------+------------------+------------------+
+ * |  prependable      |  readable bytes  |  writable bytes  |
+ * |                   |     (CONTENT)    |                  |
+ * +-------------------+------------------+------------------+
+ * |                   |                  |                  |
+ * 0      <=      readerIndex   <=   writerIndex    <=     size
+
+ */
+
 class Buffer {
 public:
   static constexpr size_t kInitialSize = 1024;
@@ -107,6 +120,8 @@ private:
 
   const char *beginWrite() const { return begin() + writerIndex_; }
 
+  // Instead of always growing the buffer, check if we can reclaim space
+  // from the front by moving data forward
   void makeSpace(size_t len) {
     if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
       buffer_.resize(writerIndex_ + len);

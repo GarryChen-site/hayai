@@ -15,6 +15,10 @@ class Channel;
 class TcpConnection;
 using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
 
+/**
+ * @brief TcpConnection represents an active connection.
+ * It uses shared_from_this to ensure its lifetime during callbacks.
+ */
 class TcpConnection : NonCopyable,
                       public std::enable_shared_from_this<TcpConnection> {
 public:

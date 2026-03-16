@@ -1,3 +1,4 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 AlwaysBreakTemplateDeclarations: Yes
+PointerAlignment: Left

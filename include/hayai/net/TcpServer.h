@@ -16,70 +16,73 @@ class Acceptor;
  * - TcpConnection: Manages individual connections
  *
  * Connection Flow:
- * 1. Client connects → Acceptor accepts fd
- * 2. TcpServer::newConnection() creates TcpConnection
- * 3. Connection assigned to next I/O thread (round-robin)
- * 4. User callbacks invoked
- * 5. On close → removeConnection() cleans up
+ * 1. Client connects → Acceptor accepts new fd
+ * 2. Acceptor calls TcpServer::newConnection()
+ * 3. TcpServer creates TcpConnection in next I/O thread loop
+ * 4. TcpConnection is stored in connections_ map
+ * 5. User's connectionCallback_ is invoked
+ * 6. Connection handles I/O in its thread
+ * 7. On close → removeConnection() → erase from map
+
  */
 class TcpServer : NonCopyable {
-public:
-  using ConnectionCallback = std::function<void(const TcpConnectionPtr &)>;
-  using MessageCallback =
-      std::function<void(const TcpConnectionPtr &, Buffer *)>;
-  using WriteCompleteCallback = std::function<void(const TcpConnectionPtr &)>;
+  public:
+    using ConnectionCallback = std::function<void(const TcpConnectionPtr &)>;
+    using MessageCallback =
+        std::function<void(const TcpConnectionPtr &, Buffer *)>;
+    using WriteCompleteCallback = std::function<void(const TcpConnectionPtr &)>;
 
-  TcpServer(EventLoop *loop, const InetAddress &addr, std::string name);
-  ~TcpServer();
+    TcpServer(EventLoop *loop, const InetAddress &addr, std::string name);
+    ~TcpServer();
 
-  /**
-   * @brief Start the server (begin accepting connections)
-   *
-   * Thread-safe. Can be called from any thread.
-   * Idempotent - multiple calls are safe.
-   */
-  void start();
+    /**
+     * @brief Start the server (begin accepting connections)
+     *
+     * Thread-safe. Can be called from any thread.
+     * Idempotent - multiple calls are safe.
+     */
+    void start();
 
-  void stop();
+    void stop();
 
-  void setIoLoopNum(size_t num);
+    void setIoLoopNum(size_t num);
 
-  void setConnectionCallback(ConnectionCallback cb) {
-    connectionCallback_ = std::move(cb);
-  }
+    void setConnectionCallback(ConnectionCallback cb) {
+        connectionCallback_ = std::move(cb);
+    }
 
-  void setMessageCallback(MessageCallback cb) {
-    messageCallback_ = std::move(cb);
-  }
+    void setMessageCallback(MessageCallback cb) {
+        messageCallback_ = std::move(cb);
+    }
 
-  void setWriteCompleteCallback(WriteCompleteCallback cb) {
-    writeCompleteCallback_ = std::move(cb);
-  }
+    void setWriteCompleteCallback(WriteCompleteCallback cb) {
+        writeCompleteCallback_ = std::move(cb);
+    }
 
-  [[nodiscard]] const std::string &name() const { return name_; }
+    [[nodiscard]] const std::string &name() const { return name_; }
 
-  [[nodiscard]] EventLoop *getLoop() const { return loop_; }
+    [[nodiscard]] EventLoop *getLoop() const { return loop_; }
 
-  [[nodiscard]] bool started() const { return started_.load(); }
+    [[nodiscard]] bool started() const { return started_.load(); }
 
-private:
-  void newConnection(int sockfd, const InetAddress &peerAddr);
-  void removeConnection(const TcpConnectionPtr &conn);
-  void removeConnectionInLoop(const TcpConnectionPtr &conn);
+  private:
+    void newConnection(int sockfd, const InetAddress &peerAddr);
+    void removeConnection(const TcpConnectionPtr &conn);
+    void removeConnectionInLoop(const TcpConnectionPtr &conn);
 
-  EventLoop *loop_;
-  std::string name_;
+    EventLoop *loop_;
+    std::string name_;
 
-  std::unique_ptr<Acceptor> acceptor_;
-  std::unique_ptr<EventLoopThreadPool> threadPool_;
+    std::unique_ptr<Acceptor> acceptor_;
+    std::unique_ptr<EventLoopThreadPool> threadPool_;
 
-  std::map<std::string, TcpConnectionPtr> connections_;
-  int nextConnId_{1};
+    std::map<std::string, TcpConnectionPtr> connections_;
+    int nextConnId_{1};
 
-  std::atomic<bool> started_{false};
+    std::atomic<bool> started_{false};
 
-  ConnectionCallback connectionCallback_;
-  MessageCallback messageCallback_;
-  WriteCompleteCallback writeCompleteCallback_;
+    ConnectionCallback connectionCallback_;
+    MessageCallback messageCallback_;
+    WriteCompleteCallback writeCompleteCallback_;
 };
 } // namespace hayai
